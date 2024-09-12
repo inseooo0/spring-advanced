@@ -1,7 +1,9 @@
 package org.example.expert.domain.todo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.expert.config.GlobalExceptionHandler;
 import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
@@ -47,7 +49,9 @@ public class TodoControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(todoController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(todoController)
+                .setControllerAdvice(new GlobalExceptionHandler())  // @RestControllerAdvice 추가
+                .build();
     }
 
     @Test
@@ -134,17 +138,17 @@ public class TodoControllerTest {
         verify(todoService, times(1)).getTodo(1L);
     }
 
-/*    @Test
+    @Test
     void getTodo_shouldReturnNotFound_whenTodoDoesNotExist() throws Exception {
         // Given
-        when(todoService.getTodo(1L)).thenThrow(new IllegalArgumentException("Todo not found"));
+        when(todoService.getTodo(1L)).thenThrow(new InvalidRequestException("Todo not found"));
 
         // When & Then
         mockMvc.perform(get("/todos/1"))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Todo not found"))
                 .andDo(print());
 
         verify(todoService, times(1)).getTodo(1L);
-    }*/
+    }
 }
