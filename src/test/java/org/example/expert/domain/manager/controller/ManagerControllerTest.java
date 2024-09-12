@@ -1,8 +1,10 @@
 package org.example.expert.domain.manager.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.expert.config.GlobalExceptionHandler;
 import org.example.expert.config.JwtUtil;
 import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.manager.dto.request.ManagerSaveRequest;
 import org.example.expert.domain.manager.dto.response.ManagerResponse;
 import org.example.expert.domain.manager.dto.response.ManagerSaveResponse;
@@ -47,7 +49,9 @@ public class ManagerControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(managerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(managerController)
+                .setControllerAdvice(new GlobalExceptionHandler())  // @RestControllerAdvice 추가
+                .build();
     }
 
     @Test
@@ -124,7 +128,7 @@ public class ManagerControllerTest {
         verify(managerService, times(1)).deleteManager(any(AuthUser.class), eq(1L), eq(1L));
     }
 
-    /*@Test
+    @Test
     void deleteManager_shouldReturnNotFound_whenManagerDoesNotExist() throws Exception {
         // Given
         AuthUser authUser = new AuthUser(1L, "test@example.com", UserRole.USER);
@@ -138,5 +142,5 @@ public class ManagerControllerTest {
                 .andDo(print());
 
         verify(managerService, times(1)).deleteManager(any(AuthUser.class), eq(1L), eq(1L));
-    }*/
+    }
 }
