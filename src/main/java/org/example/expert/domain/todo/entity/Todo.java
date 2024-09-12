@@ -10,6 +10,7 @@ import org.example.expert.domain.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Entity
