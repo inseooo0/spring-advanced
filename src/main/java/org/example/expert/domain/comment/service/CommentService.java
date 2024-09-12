@@ -34,8 +34,8 @@ public class CommentService {
         Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
                 new InvalidRequestException("Todo not found"));
         // 담당자가 아니면 댓글을 달 수 없음
-        List<User> managers = todo.getManagers().stream().map(Manager::getUser).collect(Collectors.toList());
-        if (!managers.contains(user)) {
+        List<Long> managers = todo.getManagers().stream().map(manager -> manager.getUser().getId()).collect(Collectors.toList());
+        if (!managers.contains(user.getId())) {
             throw new InvalidRequestException("담당자만 댓글을 달 수 있습니다.");
         }
 

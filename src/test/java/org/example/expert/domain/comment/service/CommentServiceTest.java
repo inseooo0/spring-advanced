@@ -7,7 +7,6 @@ import org.example.expert.domain.comment.entity.Comment;
 import org.example.expert.domain.comment.repository.CommentRepository;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
-import org.example.expert.domain.common.exception.ServerException;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.entity.User;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +72,31 @@ class CommentServiceTest {
 
         // then
         assertNotNull(result);
+    }
+
+    @Test
+    public void saveComment_not_manager() {
+        // given
+        long todoId = 1;
+        CommentSaveRequest request = new CommentSaveRequest("contents");
+        AuthUser authUser = new AuthUser(1L, "email", UserRole.USER);
+        User user = User.fromAuthUser(authUser);
+
+        User owner = new User("email@email.com", "password", UserRole.USER);
+        ReflectionTestUtils.setField(owner, "id", 2L);
+
+        Todo todo = new Todo("title", "title", "contents", owner);
+        Comment comment = new Comment(request.getContents(), user, todo);
+
+        given(todoRepository.findById(anyLong())).willReturn(Optional.of(todo));
+
+        // when
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+            commentService.saveComment(authUser, todoId, request);
+        });
+
+        // then
+        assertEquals("담당자만 댓글을 달 수 있습니다.", exception.getMessage());
     }
 
     @Test
